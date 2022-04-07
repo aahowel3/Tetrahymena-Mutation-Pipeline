@@ -4,3 +4,7 @@
 *.sam
 *.sam.gz
 
+data/ref_genome
+data/bam_mac_aligned
+data/fastq
+
