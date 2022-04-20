@@ -1,9 +1,19 @@
 # Configuration file which holds messy variables
 include config.mk
 
-# Path to the macronuclear reference
-MAC_REF=data/ref_genome/1-upd-Genome-assembly.fasta
+#download and combine reference genomes
+#2020 MAC reference (includes rDNA chromosome chr_181)
+curl -o data/ref_genome/1-upd-Genome-assembly.fasta http://www.ciliate.org/system/downloads/1-upd-Genome-assembly.fasta
+#mitchondrial reference
+esearch -db nucleotide -query "NC_003029.1" | efetch -format fasta > data/ref_genome/NC_003029.1.fasta
+#combine and index
+cat data/ref_genome/1-upd-Genome-assembly.fasta data/ref_genome/NC_003029.1.fasta > data/ref_genome/mac_mito.fasta
+bwa index data/ref_genome/mac_mito.fasta
 
+# Path to the macronuclear reference
+MAC_REF=data/ref_genome/mac_mito.fasta
+
+#step 1
 # Setup paths
 BAM_ALN_FILES=$(addsuffix .bam,$(BASENAMES_WITH_LANES))
 BAM_ALN_FILES_MAC=$(addprefix data/bam_mac_aligned/bam_aln/,$(BAM_ALN_FILES))
@@ -25,3 +35,72 @@ data/bam_mac_aligned/bam_aln/%.bam: data/fastq/%_R1_001.fastq data/fastq/%_R2_00
 	bash scripts/align_fastq.bash $(MAC_REF) $^ $@
 
 data/bam_mac_aligned/bam_aln/%.bam: readgroups.tsv
+
+#step 2
+BAM_FIXMATE=$(addsuffix _fixmate.bam,$(BASENAMES_WITH_LANES))
+BAM_FIXMATE_FILES=$(addprefix data/bam_mac_aligned/bam_fixmate/,$(BAM_FIXMATE))
+bam_mac_aligned_fixmate: $(BAM_FIXMATE_FILES)
+.PHONY: bam_mac_aligned_fixmate
+
+data/bam_mac_aligned/bam_fixmate/%_fixmate.bam: data/bam_mac_aligned/bam_aln/%.bam
+	bash scripts/fix_matepairs.bash $^ $@
+
+#step 3
+#need a basenames without lanes
+objects := $(wildcard data/fastq/*L001_R1*)
+BAM_MERGED_FILES = $(notdir $(subst _L001_R1_001.fastq,_merged.bam, $(objects)))
+BAM_MERGED=$(addprefix data/bam_mac_aligned/bam_merged/,$(BAM_MERGED_FILES))
+bam_merged: $(BAM_MERGED)
+.PHONY: bam_merged 
+
+data/bam_mac_aligned/bam_merged/%_merged.bam : data/bam_mac_aligned/bam_fixmate/%_L001_fixmate.bam data/bam_mac_aligned/bam_fixmate/%_L002_fixmate.bam data/bam_mac_aligned/bam_fixmate/%_L003_fixmate.bam data/bam_mac_aligned/bam_fixmate/%_L004_fixmate.bam
+        bash scripts/fix_matepairs.bash $^ $@
+
+
+#step 4
+BAM_DEDUP=$(subst _merged.bam,_dedup.bam,$(BAM_MERGED_FILES))
+BAM_DEDUP_FILES=$(addprefix data/bam_mac_aligned/bam_dedup/,$(BAM_DEDUP))
+BAM_DEDUP_MET=$(addsuffix _dedup.bam,_dedup_metrics.txt,$(BAM_DEDUP_FILES))
+
+bam_mac_aligned_dedup: $(BAM_DEDUP_FILES) $(BAM_DEDUP_MET)
+.PHONY: bam_mac_aligned_dedup
+
+data/bam_mac_aligned/bam_dedup/%_dedup.bam data/bam_mac_aligned/bam_dedup/%_dedup_metrics.txt: data/bam_mac_aligned/bam_merged/%_merged.bam 
+        bash scripts/dedup.bash $^ $@
+
+
+#step 4 continued
+BAM_SORT=$(subst _merged.bam,_sort.bam,$(BAM_MERGED_FILES))
+BAM_SORT_FILES=$(addprefix data/bam_mac_aligned/bam_sort/,$(BAM_SORT))
+
+bam_mac_aligned_dedup: $(BAM_SORT_FILES) 
+.PHONY: bam_mac_aligned_dedup
+
+data/bam_mac_aligned/bam_sort/%_sort.bam: data/bam_mac_aligned/bam_merged/%_merged.bam        
+	bash scripts/sort.bash $^ $@
+
+#step 6
+CRAM=$(subst _merged.bam,.cram,$(BAM_MERGED_FILES))
+CRAM_FILES=$(addprefix data/bam_mac_aligned/crams/,$(CRAM))
+
+crams: $(CRAM_FILES)
+.PHONY: bam_mac_aligned_dedup
+
+data/bam_mac_aligned/crams/%.cram: data/bam_mac_aligned/bam_sort/%_sort.bam
+        bash scripts/create_crams.bash $(MAC_REF) $^ $@
+
+
+#step 7
+VCFS=$(subst _merged.bam,.vcf,$(BAM_MERGED_FILES))
+VCF_FILES=$(addprefix data/variant_calls/,$(VCFS))
+
+vcf: $(VCF_FILES)
+.PHONY: bam_mac_aligned_dedup
+
+data/variant_calls/%.vcf: data/bam_mac_aligned/bam_sort/%_sort.bam
+        bash scripts/haplotypecaller.bash $(MAC_REF) $^ $@
+
+
+#step 8
+data/variant_calls/ tetrahymena.gvcf.merged.vcf: 
+        bash scripts/recalibrate.bash
