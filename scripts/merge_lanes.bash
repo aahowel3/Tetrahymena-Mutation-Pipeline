@@ -1,0 +1,17 @@
+set -e
+
+PICARD=/usr/bin/picard
+PICARD_ARGS=MergeSamFiles \
+ USE_THREADING=true \
+ MAX_RECORDS_IN_RAM=2000000 \
+ VALIDATION_STRINGENCY=SILENT \
+ SORT_ORDER=queryname 
+
+#input files
+B1="$1"
+B2="$2"
+B3="$3"
+B4="$4"
+OUTBAM="$5"
+
+$PICARD $PICARD_ARGS INPUT="$B1" INPUT="$B2" INPUT="$B3" INPUT="$B4" OUTPUT="$OUTBAM"
