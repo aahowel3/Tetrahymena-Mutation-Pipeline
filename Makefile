@@ -94,6 +94,4 @@ data/variant_calls/%.vcf: data/bam_mac_aligned/bam_sort/%_sort.bam
         bash scripts/haplotypecaller.bash $(MAC_REF) $^ $@
 
 
-#step 8
-data/variant_calls/tetrahymena.gvcf.merged.vcf: 
-        bash scripts/recalibrate.bash
+
