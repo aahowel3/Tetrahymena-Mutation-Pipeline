@@ -1,16 +1,11 @@
 # Configuration file which holds messy variables
 include config.mk
 
-#download and combine reference genomes
-#2020 MAC reference (includes rDNA chromosome chr_181)
-curl -o data/ref_genome/1-upd-Genome-assembly.fasta http://www.ciliate.org/system/downloads/1-upd-Genome-assembly.fasta
-#mitchondrial reference
-esearch -db nucleotide -query "NC_003029.1" | efetch -format fasta > data/ref_genome/NC_003029.1.fasta
-#combine and index
-cat data/ref_genome/1-upd-Genome-assembly.fasta data/ref_genome/NC_003029.1.fasta > data/ref_genome/mac_mito.fasta
-bwa index data/ref_genome/mac_mito.fasta
+#step 0 download and combine reference genomes
+data/ref_genome/mac_mito.fasta:
+        bash scripts/download_data.bash
 
-# Path to the macronuclear reference
+#path to mac+mito ref
 MAC_REF=data/ref_genome/mac_mito.fasta
 
 #step 1
@@ -43,18 +38,16 @@ bam_mac_aligned_fixmate: $(BAM_FIXMATE_FILES)
 .PHONY: bam_mac_aligned_fixmate
 
 data/bam_mac_aligned/bam_fixmate/%_fixmate.bam: data/bam_mac_aligned/bam_aln/%.bam
-	bash scripts/fix_matepairs.bash $^ $@
+	bash scripts/fix_matepairs.bash $< $@
 
 #step 3
-#need a basenames without lanes
-objects := $(wildcard data/fastq/*L001_R1*)
-BAM_MERGED_FILES = $(notdir $(subst _L001_R1_001.fastq,_merged.bam, $(objects)))
+BAM_MERGED_FILES = $(addsuffix _merged.bam, $(BASENAMES)))
 BAM_MERGED=$(addprefix data/bam_mac_aligned/bam_merged/,$(BAM_MERGED_FILES))
 bam_merged: $(BAM_MERGED)
 .PHONY: bam_merged 
 
 data/bam_mac_aligned/bam_merged/%_merged.bam : data/bam_mac_aligned/bam_fixmate/%_L001_fixmate.bam data/bam_mac_aligned/bam_fixmate/%_L002_fixmate.bam data/bam_mac_aligned/bam_fixmate/%_L003_fixmate.bam data/bam_mac_aligned/bam_fixmate/%_L004_fixmate.bam
-        bash scripts/fix_matepairs.bash $^ $@
+        bash scripts/merge_lanes.bash $^ $@
 
 
 #step 4
@@ -74,7 +67,7 @@ BAM_SORT=$(subst _merged.bam,_sort.bam,$(BAM_MERGED_FILES))
 BAM_SORT_FILES=$(addprefix data/bam_mac_aligned/bam_sort/,$(BAM_SORT))
 
 bam_mac_aligned_dedup: $(BAM_SORT_FILES) 
-.PHONY: bam_mac_aligned_dedup
+.PHONY: bam_mac_aligned_sort
 
 data/bam_mac_aligned/bam_sort/%_sort.bam: data/bam_mac_aligned/bam_merged/%_merged.bam        
 	bash scripts/sort.bash $^ $@
@@ -102,5 +95,5 @@ data/variant_calls/%.vcf: data/bam_mac_aligned/bam_sort/%_sort.bam
 
 
 #step 8
-data/variant_calls/ tetrahymena.gvcf.merged.vcf: 
+data/variant_calls/tetrahymena.gvcf.merged.vcf: 
         bash scripts/recalibrate.bash
