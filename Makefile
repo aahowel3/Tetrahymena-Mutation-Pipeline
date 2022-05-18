@@ -32,54 +32,50 @@ data/bam_mac_aligned/bam_aln/%.bam: data/fastq/%_R1_001.fastq data/fastq/%_R2_00
 data/bam_mac_aligned/bam_aln/%.bam: readgroups.tsv
 
 #step 2
-BAM_FIXMATE=$(addsuffix _fixmate.bam,$(BASENAMES_WITH_LANES))
-BAM_FIXMATE_FILES=$(addprefix data/bam_mac_aligned/bam_fixmate/,$(BAM_FIXMATE))
+BAM_FIXMATE_FILES=$(addprefix data/bam_mac_aligned/bam_fixmate/,$(BAM_ALN_FILES))
 bam_mac_aligned_fixmate: $(BAM_FIXMATE_FILES)
 .PHONY: bam_mac_aligned_fixmate
 
-data/bam_mac_aligned/bam_fixmate/%_fixmate.bam: data/bam_mac_aligned/bam_aln/%.bam
+data/bam_mac_aligned/bam_fixmate/%.bam: data/bam_mac_aligned/bam_aln/%.bam
 	bash scripts/fix_matepairs.bash $< $@
 
 #step 3
-BAM_MERGED_FILES = $(addsuffix _merged.bam, $(BASENAMES)))
-BAM_MERGED=$(addprefix data/bam_mac_aligned/bam_merged/,$(BAM_MERGED_FILES))
+BAM_MERGED=$(addprefix data/bam_mac_aligned/bam_merged/,$(BAM_ALN_FILES))
 bam_merged: $(BAM_MERGED)
 .PHONY: bam_merged 
 
-data/bam_mac_aligned/bam_merged/%_merged.bam : data/bam_mac_aligned/bam_fixmate/%_L001_fixmate.bam data/bam_mac_aligned/bam_fixmate/%_L002_fixmate.bam data/bam_mac_aligned/bam_fixmate/%_L003_fixmate.bam data/bam_mac_aligned/bam_fixmate/%_L004_fixmate.bam
+data/bam_mac_aligned/bam_merged/%.bam : data/bam_mac_aligned/bam_fixmate/%_L001.bam data/bam_mac_aligned/bam_fixmate/%_L002.bam data/bam_mac_aligned/bam_fixmate/%_L003.bam data/bam_mac_aligned/bam_fixmate/%_L004.bam
         bash scripts/merge_lanes.bash $^ $@
 
 
 #step 4
-BAM_DEDUP=$(subst _merged.bam,_dedup.bam,$(BAM_MERGED_FILES))
-BAM_DEDUP_FILES=$(addprefix data/bam_mac_aligned/bam_dedup/,$(BAM_DEDUP))
-BAM_DEDUP_MET=$(addsuffix _dedup.bam,_dedup_metrics.txt,$(BAM_DEDUP_FILES))
+BAM_DEDUP_FILES=$(addprefix data/bam_mac_aligned/bam_dedup/,$(BAM_ALN_FILES))
+BAM_DEDUP_MET=$(subst _.bam,_dedup_metrics.txt,$(BAM_DEDUP_FILES))
 
 bam_mac_aligned_dedup: $(BAM_DEDUP_FILES) $(BAM_DEDUP_MET)
 .PHONY: bam_mac_aligned_dedup
 
-data/bam_mac_aligned/bam_dedup/%_dedup.bam data/bam_mac_aligned/bam_dedup/%_dedup_metrics.txt: data/bam_mac_aligned/bam_merged/%_merged.bam 
+data/bam_mac_aligned/bam_dedup/%.bam data/bam_mac_aligned/bam_dedup/%_dedup_metrics.txt: data/bam_mac_aligned/bam_merged/%.bam 
         bash scripts/dedup.bash $^ $@
 
 
 #step 4 continued
-BAM_SORT=$(subst _merged.bam,_sort.bam,$(BAM_MERGED_FILES))
-BAM_SORT_FILES=$(addprefix data/bam_mac_aligned/bam_sort/,$(BAM_SORT))
+BAM_SORT_FILES=$(addprefix data/bam_mac_aligned/bam_sort/,$(BAM_ALN_FILES))
 
 bam_mac_aligned_dedup: $(BAM_SORT_FILES) 
 .PHONY: bam_mac_aligned_sort
 
-data/bam_mac_aligned/bam_sort/%_sort.bam: data/bam_mac_aligned/bam_merged/%_merged.bam        
+data/bam_mac_aligned/bam_sort/%.bam: data/bam_mac_aligned/bam_merged/%.bam        
 	bash scripts/sort.bash $^ $@
 
 #step 6
-CRAM=$(subst _merged.bam,.cram,$(BAM_MERGED_FILES))
+CRAM=$(subst .bam,.cram,$(BAM_ALN_FILES))
 CRAM_FILES=$(addprefix data/bam_mac_aligned/crams/,$(CRAM))
 
 crams: $(CRAM_FILES)
-.PHONY: bam_mac_aligned_dedup
+.PHONY: crams
 
-data/bam_mac_aligned/crams/%.cram: data/bam_mac_aligned/bam_sort/%_sort.bam
+data/bam_mac_aligned/crams/%.cram: data/bam_mac_aligned/bam_sort/%.bam
         bash scripts/create_crams.bash $(MAC_REF) $^ $@
 
 
