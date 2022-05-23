@@ -17,20 +17,11 @@ GATK_ARGS=HaplotypeCaller \
  -A QualByDepth \
  -A RMSMappingQuality \
  -A ReadPosRankSumTest \
- -A VariantType \
- -l INFO \
- --emitRefConfidence GVCF \
- -rf BadCigar \
- --variant_index_parameter 128000 \
- --variant_index_type LINEAR \
- -R $reference_fasta \
- -nct 1 \
- -I $recalibrated_bam \
- -o $gvcf
+ -A VariantType 
 
 REF="$1"
 BAM="$2"
 VCF="$3"
 
-$GATK $GATK_ARGS -R "$REF" -I "$BAM" -o "$VCF"
+$GATK $GATK_ARGS -R "$REF" -I "$BAM" stand-call-conf 0 -ploidy 2 -o "$VCF"
 
