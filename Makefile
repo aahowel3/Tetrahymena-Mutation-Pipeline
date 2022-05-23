@@ -67,26 +67,39 @@ bam_mac_aligned_dedup: $(BAM_SORT_FILES)
 
 data/bam_mac_aligned/bam_sort/%.bam: data/bam_mac_aligned/bam_merged/%.bam        
 	bash scripts/sort.bash $^ $@
+	
 
+#step 5 - one giant mic and one giant mac file
+MIC_FILES := $(wildcard data/bam_mac_aligned/bam_sort/*GE* data/bam_mac_aligned/bam_sort/*Anc*)
+MAC_FILES := $(wildcard data/bam_mac_aligned/bam_sort/*MA* data/bam_mac_aligned/bam_sort/*SB210*)
+data/bam_mac_aligned/final_merged/mic.bam:
+        samtools merge $(MIC_FILES) $@
+data/bam_mac_aligned/final_merged/mac.bam:	
+	samtools merge $(MAC_FILES) $@
+
+#step 5.5 -split into chromosome level 
+.PHONY: split
+split: data/bam_mac_aligned/final_merged/mic.bam data/bam_mac_aligned/final_merged/mac.bam
+    bamtools split -in data/bam_mac_aligned/final_merged/mic.bam -reference
+    bamtools split -in data/bam_mac_aligned/final_merged/mac.bam -reference
+    
 #step 6
-CRAM=$(subst .bam,.cram,$(BAM_ALN_FILES))
-CRAM_FILES=$(addprefix data/bam_mac_aligned/crams/,$(CRAM))
+CRAM := $(wildcard data/bam_mac_aligned/final_merged/*.bam)
+CRAM_FILES=$(addprefix .bam,.cram $(CRAM))
 
 crams: $(CRAM_FILES)
 .PHONY: crams
-
-data/bam_mac_aligned/crams/%.cram: data/bam_mac_aligned/bam_sort/%.bam
+data/bam_mac_aligned/final_merged/%.cram: data/bam_mac_aligned/final_merged/%.bam
         bash scripts/create_crams.bash $(MAC_REF) $^ $@
 
 
 #step 7
-VCFS=$(subst _merged.bam,.vcf,$(BAM_MERGED_FILES))
+VCFS = $(notdir $(subst .bam,.vcf,$(wildcard data/bam_mac_aligned/final_merged/*.bam)))
 VCF_FILES=$(addprefix data/variant_calls/,$(VCFS))
 
 vcf: $(VCF_FILES)
-.PHONY: bam_mac_aligned_dedup
-
-data/variant_calls/%.vcf: data/bam_mac_aligned/bam_sort/%_sort.bam
+.PHONY: vcf
+data/variant_calls/%.vcf: data/bam_mac_aligned/final_merged/%.bam
         bash scripts/haplotypecaller.bash $(MAC_REF) $^ $@
 
 
