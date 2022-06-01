@@ -68,19 +68,28 @@ bam_mac_aligned_dedup: $(BAM_SORT_FILES)
 data/bam_mac_aligned/bam_sort/%.bam: data/bam_mac_aligned/bam_merged/%.bam        
 	bash scripts/sort.bash $^ $@
 
-#step 5/6
-CONTIG_FILE=$(addprefix data/bam_mac_aligned/merged_contigs/,$(CONTIGS))
-CONTIG_FILE_FINAL=$(addsuffix .cram,$(CONTIG_FILE))
-
-merge_contigs: $(CONFIG_FILE_FINAL)
-.PHONY: merge_contigs
-
-data/bam_mac_aligned/merged_contigs/%.cram: $(BAM_SORT_FILES)
+#step 5 giant mic files by contig
+BASENAME_MIC=$(addsuffix .bam,$(BASENAME_MIC_FILES))
+BASENAME_MIC_FILES_LIST=$(addprefix data/bam_mac_aligned/bam_sort/,$(BASENAME_MIC))
+CONTIG_FILE_MIC=$(addprefix data/bam_mac_aligned/merged_contigs/mic_,$(CONTIGS))
+CONTIG_FILE_MIC_FINAL=$(addsuffix .cram,$(CONTIG_FILE_MIC))
+merge_contigs_mic: $(CONFIG_FILE_MIC_FINAL)
+.PHONY: merge_contigs_mic
+data/bam_mac_aligned/merged_contigs/mic_%.cram: $(BASENAME_MIC_FILES_LIST)
+    samtools merge -R $* --reference $(MAC_REF) --write-index -o $@ $^
+    
+#step 6 giant mac files by contig
+BASENAME_MAC=$(addsuffix .bam,$(BASENAME_MAC_FILES))
+BASENAME_MAC_FILES_LIST=$(addprefix data/bam_mac_aligned/bam_sort/,$(BASENAME_MAC))
+CONTIG_FILE_MAC=$(addprefix data/bam_mac_aligned/merged_contigs/mic_,$(CONTIGS))
+CONTIG_FILE_MAC_FINAL=$(addsuffix .cram,$(CONTIG_FILE_MIC))
+merge_contigs_mac: $(CONFIG_FILE_MAC_FINAL)
+.PHONY: merge_contigs_mac
+data/bam_mac_aligned/merged_contigs/mac_%.cram: $(BASENAME_MAC_FILES_LIST)
     samtools merge -R $* --reference $(MAC_REF) --write-index -o $@ $^
 
-
 #step 7
-VCFS = $(notdir $(subst .bam,.vcf,$(wildcard data/bam_mac_aligned/final_merged/*.bam)))
+VCFS = $(notdir $(subst .bam,.vcf,$(CONFIG_FILE_MAC_FINAL)))
 VCF_FILES=$(addprefix data/variant_calls/,$(VCFS))
 
 vcf: $(VCF_FILES)
