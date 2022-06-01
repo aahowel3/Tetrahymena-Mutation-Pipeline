@@ -1,4 +1,5 @@
 metadata=metadata.tsv
+dict=data/ref_genome/mac_mito.dict
 
 echo "BASENAMES_WITH_LANES=\\"
 cat $metadata | tail -n +2 | cut -f 2 |
@@ -17,3 +18,6 @@ echo ""
 echo "BASENAME_MAC_FILES=\\"
 cat $metadata | tail -n +2 | cut -f 2 |  uniq | grep -e "MA" -e "SB210" | awk '{ print "    ", $0, "\\" }'
 echo ""
+
+echo "CONTIGS=\\"
+cat $dict | cut -f 2 | sed -e 's/^.*://g' | awk '{ print "    ", $0, "\\" }'
