@@ -89,12 +89,13 @@ data/bam_mac_aligned/merged_contigs/mac_%.cram: $(BASENAME_MAC_FILES_LIST)
     samtools merge -R $* --reference $(MAC_REF) --write-index -o $@ $^
 
 #step 7
-VCFS = $(notdir $(subst .bam,.vcf,$(CONFIG_FILE_MAC_FINAL)))
+MERGED_CONFIGS=$(CONTIG_FILE_MIC_FINAL) $(CONTIG_FILE_MAC_FINAL)
+VCFS = $(notdir $(subst .bam,.vcf,$(MERGED_CONFIGS)))
 VCF_FILES=$(addprefix data/variant_calls/,$(VCFS))
 
 vcf: $(VCF_FILES)
 .PHONY: vcf
-data/variant_calls/%.vcf: data/bam_mac_aligned/final_merged/%.bam
+data/variant_calls/%.vcf: data/bam_mac_aligned/merged_contigs/%.bam
         bash scripts/haplotypecaller.bash $(MAC_REF) $^ $@
 
 
