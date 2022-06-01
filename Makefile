@@ -67,6 +67,15 @@ bam_mac_aligned_dedup: $(BAM_SORT_FILES)
 
 data/bam_mac_aligned/bam_sort/%.bam: data/bam_mac_aligned/bam_merged/%.bam        
 	bash scripts/sort.bash $^ $@
+
+
+CONTIG_FILE=$(addprefix data/bam_mac_aligned/merged_contigs/,$(CONTIGS))
+CONTIG_FILE_FINAL=$(addsuffix .bam,$(CONTIG_FILE))
+
+data/bam_mac_aligned/merged_contigs/chr_001.bam: $(BAM_SORT_FILES)
+        samtools merge -R chr_001 $@ $^
+	
+	
 	
 
 #step 5 - one giant mic and one giant mac file
