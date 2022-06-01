@@ -40,8 +40,9 @@ data/bam_mac_aligned/bam_fixmate/%.bam: data/bam_mac_aligned/bam_aln/%.bam
 	bash scripts/fix_matepairs.bash $< $@
 
 #step 3
-BAM_MERGED=$(addprefix data/bam_mac_aligned/bam_merged/,$(BAM_ALN_FILES))
-bam_merged: $(BAM_MERGED)
+BAM_MERGED=$(addsuffix .bam,$(BASENAMES))
+BAM_MERGED_FILES=$(addprefix data/bam_mac_aligned/bam_merged/,$(BAM_MERGED))
+bam_merged: $(BAM_MERGED_FILES)
 .PHONY: bam_merged 
 
 data/bam_mac_aligned/bam_merged/%.bam : data/bam_mac_aligned/bam_fixmate/%_L001.bam data/bam_mac_aligned/bam_fixmate/%_L002.bam data/bam_mac_aligned/bam_fixmate/%_L003.bam data/bam_mac_aligned/bam_fixmate/%_L004.bam
@@ -49,7 +50,7 @@ data/bam_mac_aligned/bam_merged/%.bam : data/bam_mac_aligned/bam_fixmate/%_L001.
 
 
 #step 4
-BAM_DEDUP_FILES=$(addprefix data/bam_mac_aligned/bam_dedup/,$(BAM_ALN_FILES))
+BAM_DEDUP_FILES=$(addprefix data/bam_mac_aligned/bam_dedup/,$(BAM_MERGED))
 BAM_DEDUP_MET=$(subst _.bam,_dedup_metrics.txt,$(BAM_DEDUP_FILES))
 
 bam_mac_aligned_dedup: $(BAM_DEDUP_FILES) $(BAM_DEDUP_MET)
@@ -60,8 +61,7 @@ data/bam_mac_aligned/bam_dedup/%.bam data/bam_mac_aligned/bam_dedup/%_dedup_metr
 
 
 #step 4 continued
-BAM_SORT_FILES=$(addprefix data/bam_mac_aligned/bam_sort/,$(BAM_ALN_FILES))
-
+BAM_SORT_FILES=$(addprefix data/bam_mac_aligned/bam_sort/,$(BAM_MERGED))
 bam_mac_aligned_dedup: $(BAM_SORT_FILES) 
 .PHONY: bam_mac_aligned_sort
 
@@ -70,8 +70,6 @@ data/bam_mac_aligned/bam_sort/%.bam: data/bam_mac_aligned/bam_merged/%.bam
 	
 
 #step 5 - one giant mic and one giant mac file
-MIC_FILES := $(wildcard data/bam_mac_aligned/bam_sort/*GE* data/bam_mac_aligned/bam_sort/*Anc*)
-MAC_FILES := $(wildcard data/bam_mac_aligned/bam_sort/*MA* data/bam_mac_aligned/bam_sort/*SB210*)
 data/bam_mac_aligned/final_merged/mic.bam:
         samtools merge $(MIC_FILES) $@
 data/bam_mac_aligned/final_merged/mac.bam:	
