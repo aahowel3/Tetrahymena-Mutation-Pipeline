@@ -68,36 +68,15 @@ bam_mac_aligned_dedup: $(BAM_SORT_FILES)
 data/bam_mac_aligned/bam_sort/%.bam: data/bam_mac_aligned/bam_merged/%.bam        
 	bash scripts/sort.bash $^ $@
 
-
+#step 5/6
 CONTIG_FILE=$(addprefix data/bam_mac_aligned/merged_contigs/,$(CONTIGS))
-CONTIG_FILE_FINAL=$(addsuffix .bam,$(CONTIG_FILE))
+CONTIG_FILE_FINAL=$(addsuffix .cram,$(CONTIG_FILE))
 
-data/bam_mac_aligned/merged_contigs/chr_001.bam: $(BAM_SORT_FILES)
-        samtools merge -R chr_001 $@ $^
-	
-	
-	
+merge_contigs: $(CONFIG_FILE_FINAL)
+.PHONY: merge_contigs
 
-#step 5 - one giant mic and one giant mac file
-data/bam_mac_aligned/final_merged/mic.bam:
-        samtools merge $(MIC_FILES) $@
-data/bam_mac_aligned/final_merged/mac.bam:	
-	samtools merge $(MAC_FILES) $@
-
-#step 5.5 -split into chromosome level 
-.PHONY: split
-split: data/bam_mac_aligned/final_merged/mic.bam data/bam_mac_aligned/final_merged/mac.bam
-    bamtools split -in data/bam_mac_aligned/final_merged/mic.bam -reference
-    bamtools split -in data/bam_mac_aligned/final_merged/mac.bam -reference
-    
-#step 6
-CRAM := $(wildcard data/bam_mac_aligned/final_merged/*.bam)
-CRAM_FILES=$(addprefix .bam,.cram $(CRAM))
-
-crams: $(CRAM_FILES)
-.PHONY: crams
-data/bam_mac_aligned/final_merged/%.cram: data/bam_mac_aligned/final_merged/%.bam
-        bash scripts/create_crams.bash $(MAC_REF) $^ $@
+data/bam_mac_aligned/merged_contigs/%.cram: $(BAM_SORT_FILES)
+    samtools merge -R $* --reference $(MAC_REF) --write-index -o $@ $^
 
 
 #step 7
