@@ -3,7 +3,7 @@ include config.mk
 
 #step 0 download and combine reference genomes
 data/ref_genome/mac_mito.fasta:
-        bash scripts/download_data.bash
+	bash scripts/download_data.bash
 
 #path to mac+mito ref
 MAC_REF=data/ref_genome/mac_mito.fasta
@@ -46,7 +46,7 @@ bam_merged: $(BAM_MERGED_FILES)
 .PHONY: bam_merged 
 
 data/bam_mac_aligned/bam_merged/%.bam : data/bam_mac_aligned/bam_fixmate/%_L001.bam data/bam_mac_aligned/bam_fixmate/%_L002.bam data/bam_mac_aligned/bam_fixmate/%_L003.bam data/bam_mac_aligned/bam_fixmate/%_L004.bam
-        bash scripts/merge_lanes.bash $^ $@
+	bash scripts/merge_lanes.bash $^ $@
 
 
 #step 4
@@ -57,7 +57,7 @@ bam_mac_aligned_dedup: $(BAM_DEDUP_FILES) $(BAM_DEDUP_MET)
 .PHONY: bam_mac_aligned_dedup
 
 data/bam_mac_aligned/bam_dedup/%.bam data/bam_mac_aligned/bam_dedup/%_dedup_metrics.txt: data/bam_mac_aligned/bam_merged/%.bam 
-        bash scripts/dedup.bash $^ $@
+	bash scripts/dedup.bash $^ $@
 
 
 #step 4 continued
@@ -76,7 +76,7 @@ CONTIG_FILE_MIC_FINAL=$(addsuffix .cram,$(CONTIG_FILE_MIC))
 merge_contigs_mic: $(CONFIG_FILE_MIC_FINAL)
 .PHONY: merge_contigs_mic
 data/bam_mac_aligned/merged_contigs/mic_%.cram: $(BASENAME_MIC_FILES_LIST)
-    samtools merge -R $* --reference $(MAC_REF) --write-index -o $@ $^
+	samtools merge -R $* --reference $(MAC_REF) --write-index -o $@ $^
     
 #step 6 giant mac files by contig
 BASENAME_MAC=$(addsuffix .bam,$(BASENAME_MAC_FILES))
@@ -86,7 +86,7 @@ CONTIG_FILE_MAC_FINAL=$(addsuffix .cram,$(CONTIG_FILE_MIC))
 merge_contigs_mac: $(CONFIG_FILE_MAC_FINAL)
 .PHONY: merge_contigs_mac
 data/bam_mac_aligned/merged_contigs/mac_%.cram: $(BASENAME_MAC_FILES_LIST)
-    samtools merge -R $* --reference $(MAC_REF) --write-index -o $@ $^
+	samtools merge -R $* --reference $(MAC_REF) --write-index -o $@ $^
 
 #step 7
 MERGED_CONFIGS=$(CONTIG_FILE_MIC_FINAL) $(CONTIG_FILE_MAC_FINAL)
@@ -96,7 +96,7 @@ VCF_FILES=$(addprefix data/variant_calls/,$(VCFS))
 vcf: $(VCF_FILES)
 .PHONY: vcf
 data/variant_calls/%.vcf: data/bam_mac_aligned/merged_contigs/%.bam
-        bash scripts/haplotypecaller.bash $(MAC_REF) $^ $@
+	bash scripts/haplotypecaller.bash $(MAC_REF) $^ $@
 
 
 
