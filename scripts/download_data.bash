@@ -5,3 +5,4 @@ esearch -db nucleotide -query "NC_003029.1" | efetch -format fasta > ../data/ref
 #combine and index
 cat ../data/ref_genome/1-upd-Genome-assembly.fasta ../data/ref_genome/NC_003029.1.fasta > ../data/ref_genome/mac_mito.fasta
 bwa index ../data/ref_genome/mac_mito.fasta
+picard CreateSequenceDictionary R=../data/ref_genome/mac_mito.fasta O=../data/ref_genome/mac_mito.dict
