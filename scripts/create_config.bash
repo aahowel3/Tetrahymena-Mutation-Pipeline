@@ -12,4 +12,5 @@ cat $metadata | tail -n +2 | cut -f 2 |
 echo ""
 
 echo "CONTIGS=\\"
-cat $dict | cut -f 2 | sed -e 's/^.*://g' | awk '{ print "    ", $0, "\\" }'
+cat $dict | grep "^@SQ" |cut -f 2 | sed -e 's/^.*://g' | awk '{ print "    ", $0, "\\" }'
+echo ""
