@@ -47,7 +47,7 @@ bam_merged: $(BAM_MERGED_FILES)
 .PHONY: bam_merged 
 
 data/bam_mac_aligned/bam_merged/%.bam : data/bam_mac_aligned/bam_fixmate/%_L001.bam data/bam_mac_aligned/bam_fixmate/%_L002.bam data/bam_mac_aligned/bam_fixmate/%_L003.bam data/bam_mac_aligned/bam_fixmate/%_L004.bam
-	bash scripts/merge_lanes.bash $^ $@
+	bash scripts/merge_lanes.bash $@ $^
 
 
 #step 4
