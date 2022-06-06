@@ -7,6 +7,7 @@ data/ref_genome/mac_mito.fasta:
 
 #path to mac+mito ref
 MAC_REF=data/ref_genome/mac_mito.fasta
+DICT=data/ref_genome/mac_mito.dict
 
 #step 1
 # Setup paths
@@ -18,8 +19,8 @@ bam_mac_aligned: $(BAM_ALN_FILES_MAC)
 .PHONY: bam_mac_aligned
 
 # Recreate the configuration file for this makefile
-config.mk : metadata.tsv
-	bash scripts/create_config.bash > $@
+config.mk : metadata.tsv $(DICT)
+	bash scripts/create_config.bash $^ > $@
 
 # Create a readgroups metadata file for use in alignment
 readgroups.tsv : metadata.tsv
