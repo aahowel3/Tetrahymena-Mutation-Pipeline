@@ -360,7 +360,6 @@ BASENAMES=\
      SB210E_2_S2 \
 
 CONTIGS=\
-     1.5 \
      chr_001 \
      chr_002 \
      chr_003 \
