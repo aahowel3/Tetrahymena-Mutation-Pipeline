@@ -70,8 +70,9 @@ data/bam_mac_aligned/bam_sort/%.bam: data/bam_mac_aligned/bam_merged/%.bam
 	bash scripts/sort.bash $^ $@
 
 #step 5 giant mic files by contig
-CONTIG_FILE=$(addprefix data/bam_mac_aligned/merged_contigs/,$(CONTIGS))
-CONTIG_FILE_FINAL=$(addsuffix .cram,$(CONTIG_FILE))
+CONTIG_CRAMS=$(addsuffix .cram,$(CONTIGS))
+CONTIG_FILES=$(addprefix data/bam_mac_aligned/merged_contigs/,$(CONTIG_CRAMS))
+
 merge_contigs_mic: $(CONFIG_FILE_FINAL)
 .PHONY: merge_contigs_mic
 data/bam_mac_aligned/merged_contigs/%.cram: $(BAM_SORT_FILES) 
