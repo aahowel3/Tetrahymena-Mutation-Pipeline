@@ -9,6 +9,14 @@ data/ref_genome/mac_mito.fasta:
 MAC_REF=data/ref_genome/mac_mito.fasta
 DICT=data/ref_genome/mac_mito.dict
 
+# Recreate the configuration file for this makefile
+config.mk : metadata.tsv $(DICT)
+	bash scripts/create_config.bash $^ > $@
+
+# Create a readgroups metadata file for use in alignment
+readgroups.tsv : metadata.tsv
+	cat $< | bash scripts/create_readgroups.bash  | cut -f 2- | uniq > $@
+
 #step 1
 # Setup paths
 BAM_ALN_FILES=$(addsuffix .bam,$(BASENAMES_WITH_LANES))
@@ -17,14 +25,6 @@ BAM_ALN_FILES_MAC=$(addprefix data/bam_mac_aligned/bam_aln/,$(BAM_ALN_FILES))
 bam_mac_aligned: $(BAM_ALN_FILES_MAC)
 
 .PHONY: bam_mac_aligned
-
-# Recreate the configuration file for this makefile
-config.mk : metadata.tsv $(DICT)
-	bash scripts/create_config.bash $^ > $@
-
-# Create a readgroups metadata file for use in alignment
-readgroups.tsv : metadata.tsv
-	cat $< | bash scripts/create_readgroups.bash  | cut -f 2- | uniq > $@
 
 # Align fastq files to the mac refrence using bwa mem
 data/bam_mac_aligned/bam_aln/%.bam: data/fastq/%_R1_001.fastq data/fastq/%_R2_001.fastq
