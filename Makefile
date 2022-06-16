@@ -2,7 +2,7 @@
 include config.mk
 
 #step 0 download and combine reference genomes
-data/ref_genome/mac_mito.fasta:
+data/ref_genome/mac_mito.fasta data/ref_genome/mac_mito.dict:
 	bash scripts/download_data.bash
 
 #path to mac+mito ref
@@ -42,7 +42,8 @@ data/bam_mac_aligned/bam_fixmate/%.bam: data/bam_mac_aligned/bam_aln/%.bam
 
 #step 3
 BAM_MERGED=$(addsuffix .bam,$(BASENAMES))
-BAM_MERGED_FILES=$(addprefix data/bam_mac_aligned/bam_merged/,$(BAM_MERGED))
+OTHERVAR=$(filter-out Anc-1-B_S1.bam,$(BAM_MERGED))
+BAM_MERGED_FILES=$(addprefix data/bam_mac_aligned/bam_merged/,$(OTHERVAR))
 bam_merged: $(BAM_MERGED_FILES)
 .PHONY: bam_merged 
 
@@ -50,24 +51,26 @@ data/bam_mac_aligned/bam_merged/%.bam : data/bam_mac_aligned/bam_fixmate/%_L001.
 	bash scripts/merge_lanes.bash $@ $^
 
 
+#new rule for only Anc_1_B that doesnt have a lanes 2-4
+data/bam_mac_aligned/bam_merged/Anc-1-B_S1.bam : data/bam_mac_aligned/bam_fixmate/Anc-1-B_S1_L001.bam
+	cp data/bam_mac_aligned/bam_fixmate/Anc-1-B_S1_L001.bam data/bam_mac_aligned/bam_merged/Anc-1-B_S1.bam
+
 #step 4
-BAM_DEDUP_FILES=$(addprefix data/bam_mac_aligned/bam_dedup/,$(BAM_MERGED))
-BAM_DEDUP_MET=$(subst _.bam,_dedup_metrics.txt,$(BAM_DEDUP_FILES))
-
-bam_mac_aligned_dedup: $(BAM_DEDUP_FILES) $(BAM_DEDUP_MET)
-.PHONY: bam_mac_aligned_dedup
-
-data/bam_mac_aligned/bam_dedup/%.bam data/bam_mac_aligned/bam_dedup/%_dedup_metrics.txt: data/bam_mac_aligned/bam_merged/%.bam 
-	bash scripts/dedup.bash $^ $@
-
-
-#step 4 continued
 BAM_SORT_FILES=$(addprefix data/bam_mac_aligned/bam_sort/,$(BAM_MERGED))
 bam_mac_aligned_dedup: $(BAM_SORT_FILES) 
 .PHONY: bam_mac_aligned_sort
 
 data/bam_mac_aligned/bam_sort/%.bam: data/bam_mac_aligned/bam_merged/%.bam        
 	bash scripts/sort.bash $^ $@
+
+
+#step 4 cont
+BAM_DEDUP_FILES=$(addprefix data/bam_mac_aligned/bam_dedup/,$(BAM_MERGED))
+bam_mac_aligned_dedup: $(BAM_DEDUP_FILES)
+.PHONY: bam_mac_aligned_dedup
+
+data/bam_mac_aligned/bam_dedup/%.bam : data/bam_mac_aligned/bam_sort/%.bam
+	bash scripts/dedup.bash $^ $@ data/bam_mac_aligned/bam_dedup/$*_dedup_metrics.txt
 
 #step 5 giant mic files by contig
 CONTIG_CRAMS=$(addsuffix .cram,$(CONTIGS))
