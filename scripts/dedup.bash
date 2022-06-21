@@ -10,3 +10,4 @@ BAM_out="$2"
 MET="$3"
 
 $PICARD $PICARD_ARGS M="$MET" I="$BAM_in" O="$BAM_out"
+samtools index "$BAM_out"

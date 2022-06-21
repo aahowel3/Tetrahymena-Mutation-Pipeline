@@ -16,11 +16,15 @@ BAM="$4"
 base=$(basename "$F1" _R1_001.fastq)
 
 RG=$(awk -F'\t' -v base="base:${base}" '$1 == base { $1 = "@RG"; print }' "$READGROUPS")
+oldstr="T. thermophila Whole Genome DNA"
+newstr="T.thermophila_Whole_Genome_DNA"
+result=$(echo $RG | sed "s/$oldstr/$newstr/")
+RB=${result//$' '/'\t'}
 
-if [ -z "$RG" ]; then
+if [ -z "$RB" ]; then
   echo "ERROR: Read group not found"
   exit 1
 fi
 
-$BWAMEM_BIN $BWAMEM_ARGS -R "$RG" "$REF" "$F1" "$F2" |
+$BWAMEM_BIN $BWAMEM_ARGS -R "$RB" "$REF" "$F1" "$F2" |
   $SAMTOOLS_BIN view -Shb -o "$BAM"
