@@ -42,8 +42,7 @@ data/bam_mac_aligned/bam_fixmate/%.bam: data/bam_mac_aligned/bam_aln/%.bam
 
 #step 3
 BAM_MERGED=$(addsuffix .bam,$(BASENAMES))
-OTHERVAR=$(filter-out Anc-1-B_S1.bam,$(BAM_MERGED))
-BAM_MERGED_FILES=$(addprefix data/bam_mac_aligned/bam_merged/,$(OTHERVAR))
+BAM_MERGED_FILES=$(addprefix data/bam_mac_aligned/bam_merged/,$(BAM_MERGED))
 bam_merged: $(BAM_MERGED_FILES)
 .PHONY: bam_merged 
 
@@ -57,7 +56,7 @@ data/bam_mac_aligned/bam_merged/Anc-1-B_S1.bam : data/bam_mac_aligned/bam_fixmat
 
 #step 4
 BAM_SORT_FILES=$(addprefix data/bam_mac_aligned/bam_sort/,$(BAM_MERGED))
-bam_mac_aligned_dedup: $(BAM_SORT_FILES) 
+bam_mac_aligned_sort: $(BAM_SORT_FILES) 
 .PHONY: bam_mac_aligned_sort
 
 data/bam_mac_aligned/bam_sort/%.bam: data/bam_mac_aligned/bam_merged/%.bam        
@@ -76,18 +75,18 @@ data/bam_mac_aligned/bam_dedup/%.bam : data/bam_mac_aligned/bam_sort/%.bam
 CONTIG_CRAMS=$(addsuffix .cram,$(CONTIGS))
 CONTIG_FILES=$(addprefix data/bam_mac_aligned/merged_contigs/,$(CONTIG_CRAMS))
 
-merge_contigs_mic: $(CONFIG_FILE_FINAL)
+merge_contigs_mic: $(CONTIG_FILES)
 .PHONY: merge_contigs_mic
-data/bam_mac_aligned/merged_contigs/%.cram: $(BAM_SORT_FILES) 
-	samtools merge -R $* --reference $(MAC_REF) --write-index -o $@ $^
+data/bam_mac_aligned/merged_contigs/%.cram: $(BAM_DEDUP_FILES) 
+	samtools merge -R $* --reference $(MAC_REF) --write-index $@ $^
     
 #step 7
-VCFS = $(notdir $(subst .bam,.vcf,$(CONFIG_FILE_FINAL)))
+VCFS = $(notdir $(subst .cram,.vcf,$(CONTIG_FILES)))
 VCF_FILES=$(addprefix data/variant_calls/,$(VCFS))
 
 vcf: $(VCF_FILES)
 .PHONY: vcf
-data/variant_calls/%.vcf: data/bam_mac_aligned/merged_contigs/%.bam
+data/variant_calls/%.vcf: data/bam_mac_aligned/merged_contigs/%.cram
 	bash scripts/haplotypecaller.bash $(MAC_REF) $^ $@
 
 
