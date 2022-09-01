@@ -1,0 +1,44 @@
+##PEDNG v1.0
+#Indiviudal 	Father	Mother	Sex	Samples 	
+SB210E_MIC@diploid 	.	.	autosomal	.	
+SB210E_MAC@clone 	SB210E_MIC:0	.	autosomal	SB210E_1 	SB210E_2
+Anc_1@gamete	SB210E_MIC:0	.	autosomal	Anc_1_A	Anc_1_B
+Anc_2@gamete	SB210E_MIC:0	.	autosomal	Anc_2_A	Anc_2_B
+Anc_3@gamete	SB210E_MIC:0	.	autosomal	Anc_3_A	Anc_3_B
+Anc_4@gamete	SB210E_MIC:0	.	autosomal	Anc_4_A	Anc_4_B
+Anc_5@gamete	SB210E_MIC:0	.	autosomal	Anc_5_A	Anc_5_B
+Anc_6@gamete	SB210E_MIC:0	.	autosomal	Anc_6_A	Anc_6_B
+Anc_7@gamete	SB210E_MIC:0	.	autosomal	Anc_7_A	Anc_7_B
+Anc_8@gamete	SB210E_MIC:0	.	autosomal	Anc_8_A	Anc_8_B
+Anc_9@gamete	SB210E_MIC:0	.	autosomal	Anc_9_A	Anc_9_B
+Anc_10@gamete	SB210E_MIC:0	.	autosomal	Anc_10_A	Anc_10_B
+Anc_11@gamete	SB210E_MIC:0	.	autosomal	Anc_11_A	Anc_11_B
+Anc_12@gamete	SB210E_MIC:0	.	autosomal	Anc_12_A	Anc_12_B
+Anc_13@gamete	SB210E_MIC:0	.	autosomal	Anc_13_A	Anc_13_B
+Anc_14@gamete	SB210E_MIC:0	.	autosomal	Anc_14_A	Anc_14_B
+Anc_15@gamete	SB210E_MIC:0	.	autosomal	Anc_15_A	Anc_15_B
+Anc_16@gamete	SB210E_MIC:0	.	autosomal	Anc_16_A	Anc_16_B
+Anc_17@gamete	SB210E_MIC:0	.	autosomal	Anc_17_A	Anc_17_B
+Anc_18@gamete	SB210E_MIC:0	.	autosomal	Anc_18_A	Anc_18_B
+Anc_19@gamete	SB210E_MIC:0	.	autosomal	Anc_19_A	Anc_19_B
+Anc_20@gamete	SB210E_MIC:0	.	autosomal	Anc_20_A	Anc_20_B
+A12MA@clone	SB210E_MAC:1500	.	autosomal	A12MA	
+C12MA@clone	SB210E_MAC:1500	.	autosomal	C12MA	
+C3MA@clone	SB210E_MAC:1500	.	autosomal	C3MA	
+D2MA@clone	SB210E_MAC:1500	.	autosomal	D2MA	
+F6MA@clone	SB210E_MAC:1500	.	autosomal	F6MA	
+F7MA@clone	SB210E_MAC:1500	.	autosomal	F7MA	
+G10MA@clone	SB210E_MAC:1500	.	autosomal	G10MA	
+G12MA@clone	SB210E_MAC:1500	.	autosomal	G12MA	
+G7MA@clone	SB210E_MAC:1500	.	autosomal	G7MA	
+G9MA@clone	SB210E_MAC:1500	.	autosomal	G9MA	
+A12GE@gamete 	SB210E_MIC:1500	.	autosomal	A12GE1	A12GE2
+C12GE@gamete 	SB210E_MIC:1500	.	autosomal	C12GE1	C12GE2
+C3GE@gamete 	SB210E_MIC:1500	.	autosomal	C3GE1	C3GE2
+D2GE@gamete 	SB210E_MIC:1500	.	autosomal	D2GE1	D2GE2
+F6GE@gamete 	SB210E_MIC:1500	.	autosomal	F6GE1	F6GE2
+F7GE@gamete 	SB210E_MIC:1500	.	autosomal	F7GE1	F7GE2
+G10GE@gamete 	SB210E_MIC:1500	.	autosomal	G10GE1	G10GE2
+G12GE@gamete 	SB210E_MIC:1500	.	autosomal	G12GE1	G12GE2
+G7GE@gamete 	SB210E_MIC:1500	.	autosomal	G7GE1	G7GE2
+G9GE@gamete 	SB210E_MIC:1500	.	autosomal	G9GE1	G9GE2
