@@ -1,6 +1,6 @@
 set -e
 
-PICARD=/usr/bin/picard
+PICARD="java -jar /home/aahowel3/picard/build/libs/picard.jar"
 PICARD_ARGS=MarkDuplicates \
  MAX_RECORDS_IN_RAM=2000000 \
  VALIDATION_STRINGENCY=SILENT  

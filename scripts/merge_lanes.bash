@@ -1,5 +1,5 @@
 set -e
-PICARD=/usr/bin/picard
+PICARD="java -jar /home/aahowel3/picard/build/libs/picard.jar"
 PICARD_ARGS=MergeSamFiles \
  USE_THREADING=true \
  MAX_RECORDS_IN_RAM=2000000 \

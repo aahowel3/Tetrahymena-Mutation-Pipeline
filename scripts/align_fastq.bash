@@ -13,7 +13,7 @@ F1="$2"
 F2="$3"
 BAM="$4"
 
-base=$(basename "$F1" _R1_001.fastq)
+base=$(basename "$F1" _R1_001.fastq.gz)
 
 RG=$(awk -F'\t' -v base="base:${base}" '$1 == base { $1 = "@RG"; print }' "$READGROUPS")
 oldstr="T. thermophila Whole Genome DNA"

@@ -1,4 +1,4 @@
-PICARD=/usr/bin/picard
+PICARD="java -jar /home/aahowel3/picard/build/libs/picard.jar"
 #2020 MAC reference (includes rDNA chromosome chr_181)
 curl -o data/ref_genome/1-upd-Genome-assembly.fasta http://www.ciliate.org/system/downloads/1-upd-Genome-assembly.fasta
 #mitchondrial reference
